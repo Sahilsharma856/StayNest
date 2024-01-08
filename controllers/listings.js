@@ -1,6 +1,7 @@
 const Listing = require("../models/listing");
 
 const mbxGeocoding = require('@mapbox/mapbox-sdk/services/geocoding');
+const ExpressError = require("../utils/ExpressErrors");
 const mapToken = process.env.MAP_TOKEN;
 const geocodingClient = mbxGeocoding({ accessToken: mapToken });
 
@@ -15,7 +16,49 @@ const addCoordinates = async (listing) => {
 }
 
 module.exports.index = async (req, res) => {
-    const allListings = await Listing.find({});
+    let search = req.query.search || "";
+    let category = req.query.category || "";
+    let allListings = [];
+    if(category!="") {
+        allListings = await Listing.find({category: `${category}`});
+    }else if(search !== "") {
+        // allListings = await Listing.find({ title: { $regex: `\\b${search}`, $options: 'i' } }).populate("owner");
+        // allListings = await Listing.find({
+        //     $or: [
+        //       { title: { $regex: `\\b${search}`, $options: 'i' } },
+        //       { location: { $regex: `\\b${search}`, $options: 'i' } },
+        //       { country: { $regex: `\\b${search}`, $options: 'i' } },
+        //       { 'owner.username': { $regex: `\\b${search}`, $options: 'i' } }
+        //     ]
+        //   }).populate("owner").populate("reviews");
+        allListings = await Listing.aggregate([
+            {
+              $lookup: {
+                from: "users",
+                localField: "owner",
+                foreignField: "_id",
+                as: "result"
+              }
+            },
+            {
+              $match: {
+                $or: [
+                  { title: { $regex: `\\b${search}`, $options: 'i' } },
+                  { location: { $regex: `\\b${search}`, $options: 'i' } },
+                  { country: { $regex: `\\b${search}`, $options: 'i' } },
+                  { 'result.username': { $regex: `\\b${search}`, $options: 'i' } },
+                  {category: { $regex: `\\b${search}`, $options: 'i' }}
+                ]
+              }
+            }
+          ]);
+        if(allListings.length === 0) {
+            throw new ExpressError(404, "No match found");
+        }
+    }else {
+        allListings = await Listing.find({});
+    }
+
     res.render("listings/index.ejs", { allListings });
 };
 
