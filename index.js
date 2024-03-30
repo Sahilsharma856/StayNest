@@ -1,24 +1,26 @@
-if(process.env.NODE_ENV != "production") {
-    require("dotenv").config();
+import dotenv from "dotenv";
+import express from "express";
+import mongoose from "mongoose";
+import path from "path";
+import methodOverride from "method-override";
+import ejsMate from "ejs-mate";
+import ExpressError from "./utils/ExpressErrors.js";
+import session from "express-session";
+import MongoStore from "connect-mongo";
+import flash from "connect-flash";
+import passport from "passport";
+import LocalStrategy from "passport-local";
+import User from "./models/user.js";
+
+import listingsRouter from "./routes/listing.js";
+import reviewsRouter from "./routes/review.js";
+import userRouter from "./routes/user.js";
+
+if (process.env.NODE_ENV !== "production") {
+  dotenv.config();
 }
 
-const express = require("express");
 const app = express();
-const mongoose = require("mongoose");
-const path = require("path");
-const methodOverride = require("method-override");
-const ejsMate = require("ejs-mate");
-const ExpressError = require("./utils/ExpressErrors.js");
-const session = require("express-session");
-const MongoStore = require('connect-mongo');
-const flash = require("connect-flash");
-const passport = require("passport");
-const LocalStrategy = require("passport-local");
-const User = require("./models/user.js");
-
-const listingsRouter = require("./routes/listing.js");
-const reviewsRouter = require("./routes/review.js");
-const userRouter = require("./routes/user.js");
 
 app.engine("ejs", ejsMate)
 
