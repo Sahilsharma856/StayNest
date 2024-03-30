@@ -25,7 +25,7 @@ app.engine("ejs", ejsMate)
 const db_url = process.env.ATLASDB_URL;
 main()
     .then(()=>{
-        console.log("connected to db");
+        console.log("connected to database");
     })
     .catch((err) => {
         console.log(err);
