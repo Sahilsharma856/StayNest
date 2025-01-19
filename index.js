@@ -24,7 +24,7 @@ app.engine("ejs", ejsMate)
 
 const db_url = process.env.ATLASDB_URL;
 main()
-    .then(()=>{
+    .then(() => {
         console.log("connected to database");
     })
     .catch((err) => {
@@ -36,22 +36,25 @@ async function main() {
 }
 
 app.use(methodOverride("_method"));
-app.use(express.urlencoded({extended:true}));
+app.use(express.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 app.use(express.static(path.join(__dirname, "public")));
+
+// Comment out or remove any map-related environment variables
+// const mapToken = process.env.MAP_TOKEN; // Commented out if map functionality is not needed
 
 const store = MongoStore.create({
     mongoUrl: db_url,
     crypto: {
         secret: process.env.SECRET
     },
-    touchAfter: 3600*24
+    touchAfter: 3600 * 24
 });
 
 store.on("error", () => {
     console.log("ERROR in MONGO SESSION STORE", err);
-})
+});
 
 const sessionOptions = {
     store,
@@ -59,8 +62,8 @@ const sessionOptions = {
     resave: false,
     saveUninitialized: true,
     cookie: {
-        expires: Date.now() + 1000*60*60*24*7,
-        maxAge: 1000*60*60*24*7,
+        expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
+        maxAge: 1000 * 60 * 60 * 24 * 7,
         httpOnly: true
     }
 }
@@ -93,8 +96,8 @@ app.all("*", (req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-    let {statusCode=500, message="Something went wrong"} = err;
-    res.status(statusCode).render("error.ejs", {err});
+    let { statusCode = 500, message = "Something went wrong" } = err;
+    res.status(statusCode).render("error.ejs", { err });
     // res.status(statusCode).send(message);
 });
 

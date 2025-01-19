@@ -148,12 +148,6 @@ body {
   width: 5rem;
 }
 
-/* MAP */
-#map {
-  height: 60vh;
-  width: 100%;
-  border-radius: 1rem;
-}
 
 /* Filters */
 .filters {
